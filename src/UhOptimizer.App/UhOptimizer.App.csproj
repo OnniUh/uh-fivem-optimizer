@@ -5,7 +5,8 @@
     <UseWPF>true</UseWPF>
     <AssemblyName>UhFiveMOptimizer</AssemblyName>
     <RootNamespace>UhOptimizer.App</RootNamespace>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
+    <DefineConstants Condition="'$(PublishSingleFile)' == 'true'">$(DefineConstants);SINGLE_FILE</DefineConstants>
     <Company>Uh</Company>
     <Product>Uh FiveM Optimizer</Product>
     <Description>Transparent FiveM setup and reversible Windows power-plan tuning.</Description>

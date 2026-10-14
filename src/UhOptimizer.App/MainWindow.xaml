@@ -1,103 +1,130 @@
-<Window x:Class="UhOptimizer.App.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Uh FiveM Optimizer" Width="1180" Height="830" MinWidth="980" MinHeight="700" WindowStartupLocation="CenterScreen" Background="{StaticResource Bg}" Foreground="#EDF3F8" FontFamily="Segoe UI" UseLayoutRounding="True">
-  <Grid Background="{StaticResource Bg}">
+<Window x:Class="UhOptimizer.App.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:ui="clr-namespace:UhOptimizer.App.Controls"
+        Title="Uh FiveM Optimizer" Width="1280" Height="900" MinWidth="1000" MinHeight="720" WindowStartupLocation="CenterScreen" Background="{DynamicResource Bg}" Foreground="#EDF4EF" FontFamily="Segoe UI" UseLayoutRounding="True">
+  <Grid Background="{DynamicResource Bg}">
     <Grid.ColumnDefinitions><ColumnDefinition Width="218"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-    <Border Background="#10161C" BorderBrush="{StaticResource Line}" BorderThickness="0,0,1,0">
-      <Grid Margin="18,30,18,20">
+    <Border Background="{DynamicResource Sidebar}" BorderBrush="{DynamicResource Line}" BorderThickness="0,0,1,0">
+      <Grid Margin="18,30,18,22">
         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-        <StackPanel Margin="10,0,0,38">
-          <Border Background="{StaticResource Accent}" Width="48" Height="48" CornerRadius="12" HorizontalAlignment="Left"><TextBlock Text="Uh" FontWeight="Bold" FontSize="24" Foreground="#12210A" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
-          <TextBlock Text="Uh FiveM" FontSize="22" FontWeight="SemiBold" Margin="0,16,0,1"/><TextBlock Text="OPTIMIZER" FontSize="10" Foreground="{StaticResource Muted}"/>
+        <StackPanel Margin="12,0,0,38">
+          <Border Background="{DynamicResource PrimaryFill}" BorderBrush="{DynamicResource AccentLine}" BorderThickness="1" Width="49" Height="49" CornerRadius="17" HorizontalAlignment="Left"><TextBlock Text="Uh" FontWeight="Bold" FontSize="24" Foreground="{DynamicResource AccentInk}" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
+          <TextBlock Text="Uh FiveM" FontSize="23" FontWeight="SemiBold" Margin="0,17,0,2"/><TextBlock Text="OPTIMIZER / BY UH" FontSize="9" Foreground="{DynamicResource Muted}"/>
         </StackPanel>
         <StackPanel Grid.Row="1">
-          <TextBlock Text="WORKSPACE" Style="{StaticResource Label}" Margin="16,0,0,10"/>
-          <Button x:Name="OverviewNav" Content="01     Overview" Style="{StaticResource NavButton}" Tag="Overview" Click="Navigate"/>
-          <Button x:Name="TuneNav" Content="02     Tune your setup" Style="{StaticResource NavButton}" Tag="Tune" Click="Navigate"/>
-          <Button x:Name="RestoreNav" Content="03     Restore" Style="{StaticResource NavButton}" Tag="Restore" Click="Navigate"/>
-          <Button x:Name="AboutNav" Content="04     Transparency" Style="{StaticResource NavButton}" Tag="About" Click="Navigate"/>
+          <TextBlock Text="YOUR WORKSPACE" Style="{StaticResource Label}" Margin="17,0,0,12"/>
+          <Button x:Name="OverviewNav" Content="◈    Overview" Style="{StaticResource NavButton}" Tag="Overview" Click="Navigate"/>
+          <Button x:Name="TuneNav" Content="⌁    Tune your setup" Style="{StaticResource NavButton}" Tag="Tune" Click="Navigate"/>
+          <Button x:Name="RestoreNav" Content="↶    Recovery" Style="{StaticResource NavButton}" Tag="Restore" Click="Navigate"/>
+          <Button x:Name="AppearanceNav" Content="◉    Appearance" Style="{StaticResource NavButton}" Tag="Appearance" Click="Navigate"/>
+          <Button x:Name="UpdatesNav" Content="↥    Updates" Style="{StaticResource NavButton}" Tag="Updates" Click="Navigate"/>
+          <Button x:Name="AboutNav" Content="◇    Transparency" Style="{StaticResource NavButton}" Tag="About" Click="Navigate"/>
         </StackPanel>
-        <StackPanel Grid.Row="3" Margin="10,0">
-          <Border Background="#1D2D1D" CornerRadius="5" Padding="9,6" HorizontalAlignment="Left"><TextBlock Text="LOCAL BY DESIGN" Foreground="{StaticResource Accent}" FontSize="10" FontWeight="SemiBold"/></Border>
-          <TextBlock Text="Your settings. Your decision." Style="{StaticResource MutedText}" Margin="0,12,0,12"/>
-          <TextBlock Text="v0.1.0  /  by Uh" FontSize="11" Foreground="#6E8091"/>
+        <StackPanel Grid.Row="3" Margin="12,0">
+          <Border Background="{DynamicResource AccentWash}" BorderBrush="{DynamicResource AccentLine}" BorderThickness="1" CornerRadius="12" Padding="11,6" HorizontalAlignment="Left"><TextBlock Text="●  LOCAL BY DESIGN" Foreground="{DynamicResource Accent}" FontSize="9" FontWeight="SemiBold"/></Border>
+          <TextBlock Text="Your setup. Your say." Style="{StaticResource MutedText}" Margin="0,13,0,16"/>
+          <TextBlock x:Name="SidebarVersionText" Text="v0.2.0  /  UI preview" FontSize="10" Foreground="{DynamicResource Muted}"/>
         </StackPanel>
       </Grid>
     </Border>
-    <Grid Grid.Column="1" Margin="32,26,32,18">
+    <Grid Grid.Column="1" Margin="32,27,32,19">
       <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-      <Grid Margin="0,0,0,20">
-        <StackPanel><TextBlock Text="FIVEM / SETUP TOOLKIT" Style="{StaticResource Label}" Margin="0,0,0,6"/><TextBlock x:Name="PageTitle" Text="Know your setup." FontSize="30" FontWeight="SemiBold"/></StackPanel>
-        <Button x:Name="ScanButton" Content="↻  Scan again" HorizontalAlignment="Right" VerticalAlignment="Center" Click="ScanClick"/>
+      <Grid Margin="0,0,0,23">
+        <StackPanel Margin="0,0,160,0"><TextBlock Text="FIVEM / SETUP TOOLKIT" Style="{StaticResource Label}" Margin="0,0,0,7"/><TextBlock x:Name="PageTitle" Text="Your setup, at a glance." FontSize="28" FontWeight="Light"/></StackPanel>
+        <Button x:Name="ScanButton" Content="↻   Scan again" HorizontalAlignment="Right" VerticalAlignment="Center" Click="ScanClick"/>
+        <Button x:Name="AppearanceSaveHeader" Content="Save appearance   ✓" Style="{StaticResource PrimaryButton}" HorizontalAlignment="Right" VerticalAlignment="Center" Visibility="Collapsed" Click="SaveAppearanceClick"/>
       </Grid>
-      <ScrollViewer Grid.Row="1" Padding="0,0,9,0">
+      <ScrollViewer x:Name="PageScroll" Grid.Row="1" Padding="0,0,10,0">
         <Grid>
           <StackPanel x:Name="OverviewPage">
-            <Border Style="{StaticResource Card}" Background="#18251B" BorderBrush="#354A2A" Margin="0,0,0,18">
-              <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                <StackPanel><TextBlock Text="A better session starts with a clear picture." FontSize="20" FontWeight="SemiBold"/><TextBlock Text="Check your PC, review your options, and keep a way back." Style="{StaticResource MutedText}" Margin="0,8,16,0"/></StackPanel>
-                <Button Grid.Column="1" Content="Explore tuning  →" Style="{StaticResource PrimaryButton}" VerticalAlignment="Center" Click="OpenTune"/>
+            <Border Style="{StaticResource Card}" Background="{DynamicResource AccentWash}" BorderBrush="{DynamicResource AccentLine}" Padding="26,22" Margin="0,0,0,18" ClipToBounds="True">
+              <Grid MinHeight="190"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="285"/></Grid.ColumnDefinitions>
+                <StackPanel VerticalAlignment="Center" Margin="0,0,0,4">
+                  <TextBlock Text="SMALL CHANGES. CLEAR CHOICES." Foreground="{DynamicResource Accent}" FontSize="9" FontWeight="SemiBold" Margin="0,0,0,11"/>
+                  <TextBlock Text="Less friction.&#10;More FiveM." FontSize="36" FontWeight="Light" LineHeight="40"/>
+                  <TextBlock Text="Get to know your PC. Tune it on your terms." Style="{StaticResource MutedText}" Margin="0,9,0,17"/>
+                  <Button Content="Tune your setup   ↗" Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Click="OpenTune"/>
+                </StackPanel>
+                <Grid Grid.Column="1"><ui:AmbientScene x:Name="HeroScene" AccentColor="{DynamicResource AccentColor}"/><Border Background="{DynamicResource Panel}" BorderBrush="{DynamicResource Line}" BorderThickness="1" CornerRadius="13" Padding="11,6" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,0"><TextBlock Text="NATIVE MOTION / LIGHT FOOTPRINT" FontSize="8" Foreground="{DynamicResource Accent}"/></Border></Grid>
               </Grid>
             </Border>
             <UniformGrid Columns="3" Margin="0,0,-12,18">
-              <Border Style="{StaticResource Card}" Margin="0,0,12,0"><StackPanel><TextBlock Text="PROCESSOR" Style="{StaticResource Label}"/><TextBlock x:Name="CpuValue" Text="Scanning…" FontSize="15" FontWeight="SemiBold"/><TextBlock x:Name="CpuDetail" Style="{StaticResource MutedText}" Margin="0,8,0,0"/></StackPanel></Border>
-              <Border Style="{StaticResource Card}" Margin="0,0,12,0"><StackPanel><TextBlock Text="MEMORY" Style="{StaticResource Label}"/><TextBlock x:Name="RamValue" Text="—" FontSize="26" FontWeight="SemiBold"/><TextBlock Text="Installed physical memory" Style="{StaticResource MutedText}" Margin="0,8,0,0"/></StackPanel></Border>
-              <Border Style="{StaticResource Card}" Margin="0,0,12,0"><StackPanel><TextBlock Text="AVAILABLE STORAGE" Style="{StaticResource Label}"/><TextBlock x:Name="DiskValue" Text="—" FontSize="26" FontWeight="SemiBold"/><TextBlock x:Name="DiskDetail" Style="{StaticResource MutedText}" Margin="0,8,0,0"/></StackPanel></Border>
+              <Border Style="{StaticResource Card}" Margin="0,0,12,0"><StackPanel><TextBlock Text="01 / PROCESSOR" Style="{StaticResource Label}"/><TextBlock x:Name="CpuValue" Text="Scanning…" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxHeight="44"/><TextBlock x:Name="CpuDetail" Style="{StaticResource MutedText}" Margin="0,8,0,0"/></StackPanel></Border>
+              <Border Style="{StaticResource Card}" Margin="0,0,12,0"><StackPanel><TextBlock Text="02 / MEMORY" Style="{StaticResource Label}"/><TextBlock x:Name="RamValue" Text="—" FontSize="28" FontWeight="Light"/><TextBlock Text="System physical memory" Style="{StaticResource MutedText}" Margin="0,8,0,0"/></StackPanel></Border>
+              <Border Style="{StaticResource Card}" Margin="0,0,12,0"><StackPanel><TextBlock Text="03 / FREE STORAGE" Style="{StaticResource Label}"/><TextBlock x:Name="DiskValue" Text="—" FontSize="28" FontWeight="Light"/><TextBlock x:Name="DiskDetail" Style="{StaticResource MutedText}" Margin="0,8,0,0"/></StackPanel></Border>
             </UniformGrid>
-            <Border Style="{StaticResource Card}" Margin="0,0,0,18">
-              <StackPanel>
-                <Grid><TextBlock Text="LIVE RESOURCE USE" Style="{StaticResource Label}"/><TextBlock Text="●  2 SECOND INTERVAL" Foreground="{StaticResource Accent}" FontSize="10" HorizontalAlignment="Right"/></Grid>
-                <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                  <StackPanel Margin="0,0,24,0"><TextBlock x:Name="LiveCpu" Text="CPU  /  waiting for sample" FontSize="18" FontWeight="SemiBold"/><Canvas x:Name="CpuGraph" Height="64" Margin="0,12,0,0" ClipToBounds="True" Background="#10171C"/></StackPanel>
-                  <StackPanel Grid.Column="1"><TextBlock x:Name="LiveRam" Text="RAM  /  waiting for sample" FontSize="18" FontWeight="SemiBold"/><Canvas x:Name="RamGraph" Height="64" Margin="0,12,0,0" ClipToBounds="True" Background="#10171C"/></StackPanel>
-                </Grid>
-                <TextBlock Text="Whole-PC readings over the last 60 samples. These charts do not measure game FPS." Style="{StaticResource MutedText}" Margin="0,12,0,0"/>
-              </StackPanel>
-            </Border>
-            <Border Style="{StaticResource Card}" Margin="0,0,0,18">
-              <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                <StackPanel><TextBlock Text="FIVEM INSTALLATION" Style="{StaticResource Label}"/><TextBlock x:Name="FiveMValue" Text="Scanning…" FontSize="18" FontWeight="SemiBold"/><TextBlock x:Name="FiveMPath" Style="{StaticResource MutedText}" Margin="0,7,20,0"/><TextBlock x:Name="CacheValue" Style="{StaticResource MutedText}" Margin="0,5,20,0"/></StackPanel>
-                <StackPanel Grid.Column="1" VerticalAlignment="Center"><Button Content="Locate FiveM" Click="LocateClick" Margin="0,0,0,8"/><Button x:Name="OpenFolderButton" Content="Open folder  ↗" Click="OpenFiveMFolder" IsEnabled="False"/></StackPanel>
+            <Border Style="{StaticResource Card}" Margin="0,0,0,18"><StackPanel>
+              <Grid><TextBlock Text="THE LIVE PICTURE" Style="{StaticResource Label}"/><TextBlock Text="●  EVERY 2 SECONDS" Foreground="{DynamicResource Accent}" FontSize="9" HorizontalAlignment="Right"/></Grid>
+              <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                <StackPanel Margin="0,0,24,0"><TextBlock x:Name="LiveCpu" Text="CPU / collecting sample" FontSize="19" FontWeight="Light"/><Canvas x:Name="CpuGraph" Height="55" Margin="0,14,0,0" ClipToBounds="True" Background="{DynamicResource Bg}"/></StackPanel>
+                <StackPanel Grid.Column="1"><TextBlock x:Name="LiveRam" Text="RAM / collecting sample" FontSize="19" FontWeight="Light"/><Canvas x:Name="RamGraph" Height="55" Margin="0,14,0,0" ClipToBounds="True" Background="{DynamicResource Bg}"/></StackPanel>
               </Grid>
-            </Border>
-            <TextBlock x:Name="GpuValue" Style="{StaticResource MutedText}" Margin="2,0,0,5"/><TextBlock x:Name="OsValue" Style="{StaticResource MutedText}" Margin="2,0,0,12"/>
-            <Button Content="Export diagnostic report…" HorizontalAlignment="Left" Click="ExportClick"/>
+              <TextBlock Text="Whole-PC CPU and RAM over the last 60 samples. Game FPS is not measured here." Style="{StaticResource MutedText}" Margin="0,13,0,0"/>
+            </StackPanel></Border>
+            <Border Style="{StaticResource Card}" Margin="0,0,0,18"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+              <StackPanel Margin="0,0,20,0"><TextBlock Text="YOUR FIVEM INSTALLATION" Style="{StaticResource Label}"/><TextBlock x:Name="FiveMValue" Text="Scanning…" FontSize="18" FontWeight="SemiBold"/><TextBlock x:Name="FiveMPath" Style="{StaticResource MutedText}" Margin="0,7,0,0"/><TextBlock x:Name="CacheValue" Style="{StaticResource MutedText}" Margin="0,5,0,0"/></StackPanel>
+              <StackPanel Grid.Column="1" VerticalAlignment="Center"><Button Content="Locate FiveM" Click="LocateClick" Margin="0,0,0,9"/><Button x:Name="OpenFolderButton" Content="Open folder  ↗" Click="OpenFiveMFolder" IsEnabled="False"/></StackPanel>
+            </Grid></Border>
+            <TextBlock x:Name="GpuValue" Style="{StaticResource MutedText}" Margin="2,0,0,5"/><TextBlock x:Name="OsValue" Style="{StaticResource MutedText}" Margin="2,0,0,15"/>
+            <Button Content="Export diagnostic report   ↗" HorizontalAlignment="Left" Click="ExportClick"/>
           </StackPanel>
           <StackPanel x:Name="TunePage" Visibility="Collapsed">
-            <TextBlock Text="Review each change before you apply it. Results depend on your PC, game settings, and the server you join." Style="{StaticResource MutedText}" Margin="0,0,0,20"/>
+            <TextBlock Text="Review each choice before you apply it. Results depend on your PC, game settings, and the server you join." Style="{StaticResource MutedText}" Margin="0,0,0,20"/>
             <Border Style="{StaticResource Card}" Margin="0,0,0,18"><StackPanel>
-              <Grid><TextBlock Text="01 / WINDOWS POWER PLAN" Style="{StaticResource Label}"/><TextBlock Text="BACKUP + RESTORE" Foreground="{StaticResource Accent}" FontSize="10" HorizontalAlignment="Right"/></Grid>
-              <TextBlock Text="Choose how Windows uses power." FontSize="22" FontWeight="SemiBold"/>
-              <TextBlock Text="High performance can reduce power-saving behavior on some PCs. It can also increase heat, fan noise, and battery use. An FPS improvement is not guaranteed. Only plans already available on your PC are listed." Style="{StaticResource MutedText}" Margin="0,10,0,18"/>
-              <TextBlock x:Name="ActivePlanValue" Text="Current plan: scanning…" Margin="0,0,0,12"/>
-              <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><ComboBox x:Name="PlanPicker" AutomationProperties.Name="Target Windows power plan" Margin="0,0,12,0"/><Button x:Name="ApplyButton" Grid.Column="1" Content="Review change  →" Style="{StaticResource PrimaryButton}" Click="ApplyClick"/></Grid>
-              <TextBlock x:Name="PowerHint" Text="Your current plan is saved to disk before Windows is changed. Restore it any time from the Restore page." Style="{StaticResource MutedText}" Margin="0,12,0,0"/>
+              <Grid><TextBlock Text="01 / WINDOWS POWER PLAN" Style="{StaticResource Label}"/><TextBlock Text="●  BACKUP + RESTORE" Foreground="{DynamicResource Accent}" FontSize="9" HorizontalAlignment="Right"/></Grid>
+              <TextBlock Text="A little more control over power." FontSize="24" FontWeight="Light"/>
+              <TextBlock Text="High performance can reduce power-saving behavior on some PCs. It can also increase heat, fan noise, and battery use. An FPS improvement is not guaranteed. Only plans already available on your PC are listed." Style="{StaticResource MutedText}" Margin="0,11,0,20"/>
+              <TextBlock x:Name="ActivePlanValue" Text="Current plan: scanning…" Margin="0,0,0,13"/>
+              <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><ComboBox x:Name="PlanPicker" AutomationProperties.Name="Target Windows power plan" Margin="0,0,14,0"/><Button x:Name="ApplyButton" Grid.Column="1" Content="Review change   ↗" Style="{StaticResource PrimaryButton}" Click="ApplyClick"/></Grid>
+              <TextBlock x:Name="PowerHint" Text="Your original plan is saved before anything changes. Restore it any time from Recovery." Style="{StaticResource MutedText}" Margin="0,15,0,0"/>
             </StackPanel></Border>
-            <TextBlock Text="SETTINGS WORTH REVIEWING" Style="{StaticResource Label}" Margin="2,10,0,12"/>
-            <Border Style="{StaticResource Card}" Margin="0,0,0,12"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><StackPanel Margin="0,0,20,0"><TextBlock Text="Game Mode" FontSize="17" FontWeight="SemiBold"/><TextBlock Text="Review Windows gaming preferences for this PC." Style="{StaticResource MutedText}" Margin="0,6,0,0"/></StackPanel><Button Grid.Column="1" Content="Open settings  ↗" Tag="ms-settings:gaming-gamemode" Click="SettingsClick" VerticalAlignment="Center"/></Grid></Border>
-            <Border Style="{StaticResource Card}" Margin="0,0,0,12"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><StackPanel Margin="0,0,20,0"><TextBlock Text="Graphics preference" FontSize="17" FontWeight="SemiBold"/><TextBlock Text="On PCs with multiple GPUs, review which GPU Windows assigns to the actual FiveM game executable." Style="{StaticResource MutedText}" Margin="0,6,0,0"/></StackPanel><Button Grid.Column="1" Content="Open settings  ↗" Tag="ms-settings:display-advancedgraphics" Click="SettingsClick" VerticalAlignment="Center"/></Grid></Border>
-            <Border Style="{StaticResource Card}" Margin="0,0,0,12"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><StackPanel Margin="0,0,20,0"><TextBlock Text="Background captures" FontSize="17" FontWeight="SemiBold"/><TextBlock Text="Review recording options if you do not need background gameplay clips." Style="{StaticResource MutedText}" Margin="0,6,0,0"/></StackPanel><Button Grid.Column="1" Content="Open settings  ↗" Tag="ms-settings:gaming-gamedvr" Click="SettingsClick" VerticalAlignment="Center"/></Grid></Border>
-            <Border Style="{StaticResource Card}"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><StackPanel Margin="0,0,20,0"><TextBlock Text="Startup apps" FontSize="17" FontWeight="SemiBold"/><TextBlock Text="Review apps that launch with Windows. Choose what you still need." Style="{StaticResource MutedText}" Margin="0,6,0,0"/></StackPanel><Button Grid.Column="1" Content="Open settings  ↗" Tag="ms-settings:startupapps" Click="SettingsClick" VerticalAlignment="Center"/></Grid></Border>
+            <TextBlock Text="A FEW SETTINGS WORTH A LOOK" Style="{StaticResource Label}" Margin="2,12,0,14"/>
+            <Border Style="{StaticResource Card}" Margin="0,0,0,12"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><StackPanel Margin="0,0,20,0"><TextBlock Text="Game Mode" FontSize="17" FontWeight="SemiBold"/><TextBlock Text="Review Windows gaming preferences for this PC." Style="{StaticResource MutedText}" Margin="0,6,0,0"/></StackPanel><Button Grid.Column="1" Content="Open settings   ↗" Tag="ms-settings:gaming-gamemode" Click="SettingsClick" VerticalAlignment="Center"/></Grid></Border>
+            <Border Style="{StaticResource Card}" Margin="0,0,0,12"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><StackPanel Margin="0,0,20,0"><TextBlock Text="Graphics preference" FontSize="17" FontWeight="SemiBold"/><TextBlock Text="On PCs with multiple GPUs, review the GPU assigned to the actual FiveM game executable." Style="{StaticResource MutedText}" Margin="0,6,0,0"/></StackPanel><Button Grid.Column="1" Content="Open settings   ↗" Tag="ms-settings:display-advancedgraphics" Click="SettingsClick" VerticalAlignment="Center"/></Grid></Border>
+            <Border Style="{StaticResource Card}" Margin="0,0,0,12"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><StackPanel Margin="0,0,20,0"><TextBlock Text="Background captures" FontSize="17" FontWeight="SemiBold"/><TextBlock Text="Review recording options if you do not need gameplay clips." Style="{StaticResource MutedText}" Margin="0,6,0,0"/></StackPanel><Button Grid.Column="1" Content="Open settings   ↗" Tag="ms-settings:gaming-gamedvr" Click="SettingsClick" VerticalAlignment="Center"/></Grid></Border>
+            <Border Style="{StaticResource Card}"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><StackPanel Margin="0,0,20,0"><TextBlock Text="Startup apps" FontSize="17" FontWeight="SemiBold"/><TextBlock Text="Choose which apps you still need to launch with Windows." Style="{StaticResource MutedText}" Margin="0,6,0,0"/></StackPanel><Button Grid.Column="1" Content="Open settings   ↗" Tag="ms-settings:startupapps" Click="SettingsClick" VerticalAlignment="Center"/></Grid></Border>
           </StackPanel>
           <StackPanel x:Name="RestorePage" Visibility="Collapsed">
-            <TextBlock Text="A saved starting point." FontSize="24" FontWeight="SemiBold" Margin="0,0,0,10"/>
-            <TextBlock Text="Closing the app leaves your chosen power plan active. Use Restore to return to the exact plan saved before your change, including after a restart." Style="{StaticResource MutedText}" Margin="0,0,0,22"/>
-            <Border Style="{StaticResource Card}"><StackPanel>
-              <TextBlock Text="POWER PLAN BACKUP" Style="{StaticResource Label}"/><TextBlock x:Name="BackupTitle" Text="No changes yet" FontSize="22" FontWeight="SemiBold"/>
-              <TextBlock x:Name="BackupDetails" Style="{StaticResource MutedText}" Margin="0,12,0,20"/>
-              <Button x:Name="RestoreButton" Content="Review restore  ↶" Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Click="RestoreClick" IsEnabled="False"/>
+            <TextBlock Text="A saved starting point." FontSize="25" FontWeight="Light" Margin="0,0,0,10"/>
+            <TextBlock Text="Closing the app leaves your chosen power plan active. Recovery returns to the exact plan saved before your change, even after a restart." Style="{StaticResource MutedText}" Margin="0,0,0,23"/>
+            <Border Style="{StaticResource Card}"><StackPanel><TextBlock Text="YOUR POWER PLAN BACKUP" Style="{StaticResource Label}"/><TextBlock x:Name="BackupTitle" Text="No changes yet" FontSize="23" FontWeight="Light"/><TextBlock x:Name="BackupDetails" Style="{StaticResource MutedText}" Margin="0,13,0,22"/><Button x:Name="RestoreButton" Content="Review restore   ↶" Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Click="RestoreClick" IsEnabled="False"/></StackPanel></Border>
+            <Border Style="{StaticResource Card}" Margin="0,18,0,0"><StackPanel><TextBlock Text="Recovery stays on your PC." FontSize="17" FontWeight="SemiBold"/><TextBlock Text="Your backup is a readable JSON file. Keep it until you have restored your original plan. A damaged backup blocks new changes instead of being overwritten." Style="{StaticResource MutedText}" Margin="0,9,0,18"/><Button Content="Open backup folder   ↗" HorizontalAlignment="Left" Click="BackupFolderClick"/></StackPanel></Border>
+            <TextBlock Text="Settings changed inside Windows Settings are managed by Windows and are not included in the app's power-plan backup." Style="{StaticResource MutedText}" Margin="2,20,0,0"/>
+          </StackPanel>
+          <StackPanel x:Name="AppearancePage" Visibility="Collapsed">
+            <Border Style="{StaticResource Card}" Background="{DynamicResource AccentWash}" BorderBrush="{DynamicResource AccentLine}" Padding="26,20" Margin="0,0,0,19"><Grid MinHeight="130"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="215"/></Grid.ColumnDefinitions><StackPanel VerticalAlignment="Center"><TextBlock Text="YOUR SPACE. YOUR PALETTE." Foreground="{DynamicResource Accent}" FontSize="9" FontWeight="SemiBold" Margin="0,0,0,10"/><TextBlock Text="Make it feel like you." FontSize="29" FontWeight="Light"/><TextBlock Text="A live preview, all across the app." Style="{StaticResource MutedText}" Margin="0,9,0,0"/></StackPanel><ui:AmbientScene x:Name="AppearanceScene" Grid.Column="1" AccentColor="{DynamicResource AccentColor}"/></Grid></Border>
+            <Border Style="{StaticResource Card}" Margin="0,0,0,18"><StackPanel>
+              <TextBlock Text="01 / CHOOSE AN ACCENT" Style="{StaticResource Label}"/><TextBlock Text="Find your color." FontSize="21" FontWeight="Light"/><TextBlock Text="Pick a palette or enter your own hex color. Changes preview immediately; save when you like the result." Style="{StaticResource MutedText}" Margin="0,8,0,18"/>
+              <UniformGrid x:Name="PresetPanel" Columns="3" Margin="0,0,-10,14"/>
+              <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><Border Width="45" Height="45" CornerRadius="13" Background="{DynamicResource AccentRaw}" BorderBrush="{DynamicResource AccentLine}" BorderThickness="1" Margin="0,0,12,0"/><TextBox x:Name="CustomColorInput" Grid.Column="1" Height="46" Padding="13,5" Text="#B5F36B" MaxLength="7" CharacterCasing="Upper" FontFamily="Consolas" AutomationProperties.Name="Custom accent hex color" VerticalContentAlignment="Center" Margin="0,0,13,0"/><Button Grid.Column="2" Content="Preview color   ↗" Click="PreviewColorClick"/></Grid>
+              <TextBlock x:Name="ColorFeedback" Text="Living green / #B5F36B" Foreground="{DynamicResource Accent}" FontSize="12" Margin="1,13,0,0"/>
             </StackPanel></Border>
-            <Border Style="{StaticResource Card}" Margin="0,18,0,0"><StackPanel><TextBlock Text="Recovery is local." FontSize="17" FontWeight="SemiBold"/><TextBlock Text="The backup is a readable JSON file on this PC. Keep it until you have restored your original plan. A damaged backup blocks new changes instead of being overwritten." Style="{StaticResource MutedText}" Margin="0,8,0,16"/><Button Content="Open backup folder  ↗" HorizontalAlignment="Left" Click="BackupFolderClick"/></StackPanel></Border>
-            <TextBlock Text="Settings changed inside Windows Settings are managed by Windows and are not included in this app's power-plan backup." Style="{StaticResource MutedText}" Margin="2,18,0,0"/>
+            <Border Style="{StaticResource Card}" Margin="0,0,0,18"><StackPanel><TextBlock Text="02 / MOTION, YOUR WAY" Style="{StaticResource Label}"/>
+              <CheckBox x:Name="ReduceMotionCheck" Content="Reduce motion" Checked="MotionOptionChanged" Unchecked="MotionOptionChanged"/><TextBlock Text="Keep the artwork still and use instant hover/focus states. Windows reduced-motion preferences are also respected." Style="{StaticResource MutedText}" Margin="48,6,0,20"/>
+              <CheckBox x:Name="PauseGamingCheck" Content="Pause animations while FiveM is running" IsChecked="True" Checked="MotionOptionChanged" Unchecked="MotionOptionChanged"/><TextBlock Text="Visual motion automatically pauses during a game session, and whenever this window is inactive or minimized." Style="{StaticResource MutedText}" Margin="48,6,0,16"/>
+              <Border Background="{DynamicResource Bg}" CornerRadius="12" Padding="13,10"><TextBlock x:Name="MotionStatusText" Text="Subtle motion / 20 frames per second maximum" FontSize="12" Foreground="{DynamicResource Muted}"/></Border>
+            </StackPanel></Border>
+            <Grid Margin="0,0,0,8"><StackPanel Orientation="Horizontal"><Button Content="Save appearance   ✓" Style="{StaticResource PrimaryButton}" Click="SaveAppearanceClick" Margin="0,0,12,0"/><Button Content="Reset to default" Click="ResetAppearanceClick"/></StackPanel></Grid>
+            <TextBlock x:Name="AppearanceNotice" Text="Appearance preferences are saved locally on this PC." Style="{StaticResource MutedText}" Margin="2,9,0,0"/>
+          </StackPanel>
+          <StackPanel x:Name="UpdatesPage" Visibility="Collapsed">
+            <Border Style="{StaticResource Card}" Background="{DynamicResource AccentWash}" BorderBrush="{DynamicResource AccentLine}" Margin="0,0,0,19"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><StackPanel><TextBlock Text="YOUR INSTALLED VERSION" Style="{StaticResource Label}"/><TextBlock x:Name="InstalledVersionText" Text="v0.2.0" FontSize="31" FontWeight="Light"/><TextBlock Text="Updates stay inside your toolkit." Style="{StaticResource MutedText}" Margin="0,9,0,0"/></StackPanel><Border Grid.Column="1" VerticalAlignment="Center" Background="{DynamicResource Panel}" BorderBrush="{DynamicResource AccentLine}" BorderThickness="1" CornerRadius="15" Padding="14,8"><TextBlock Text="WINDOWS / X64" Foreground="{DynamicResource Accent}" FontSize="10"/></Border></Grid></Border>
+            <Border Style="{StaticResource Card}" Margin="0,0,0,18"><StackPanel>
+              <TextBlock Text="01 / CHECK WHEN YOU CHOOSE" Style="{StaticResource Label}"/><TextBlock x:Name="UpdateTitle" Text="Ready for the next version?" FontSize="24" FontWeight="Light"/>
+              <TextBlock x:Name="UpdateDetails" Text="Check GitHub for a newer release. Checking reads small version files; it does not download the EXE again." Style="{StaticResource MutedText}" Margin="0,12,0,20"/>
+              <ProgressBar x:Name="UpdateProgressBar" Minimum="0" Maximum="100" Value="0" Height="5" BorderThickness="0" Foreground="{DynamicResource AccentRaw}" Background="{DynamicResource Bg}" Margin="0,0,0,22"/>
+              <WrapPanel><Button x:Name="CheckUpdateButton" Content="Check for updates   ↻" Style="{StaticResource PrimaryButton}" Click="CheckUpdatesClick" Margin="0,0,12,10"/><Button x:Name="InstallUpdateButton" Content="Download &amp; restart   ↗" Click="InstallUpdateClick" IsEnabled="False" Margin="0,0,12,10"/><Button x:Name="CancelUpdateButton" Content="Cancel" Click="CancelUpdateClick" IsEnabled="False" Margin="0,0,0,10"/></WrapPanel>
+              <TextBlock x:Name="UpdateNotice" Text="No automatic checks, background downloads, or account sign-in. New versions are downloaded only after you choose to install them." Style="{StaticResource MutedText}" Margin="0,6,0,0"/>
+            </StackPanel></Border>
+            <Border Style="{StaticResource Card}"><StackPanel><TextBlock Text="A clear path from source to update." FontSize="18" FontWeight="SemiBold"/><TextBlock Text="Updates come from OnniUh/uh-fivem-optimizer on GitHub. The app checks release metadata, the recorded source commit, file size, and SHA-256 checksums before installation. A verified download can be reused if installation is retried." Style="{StaticResource MutedText}" Margin="0,12,0,0"/><TextBlock Text="Your saved appearance and power-plan backup stay on this PC. The previous EXE is kept beside the installed app as a .previous file. Updating requires write access to the installation folder and runs with normal Windows permissions." Style="{StaticResource MutedText}" Margin="0,12,0,17"/><Button Content="View releases on GitHub   ↗" HorizontalAlignment="Left" Click="ReleasesClick"/></StackPanel></Border>
           </StackPanel>
           <StackPanel x:Name="AboutPage" Visibility="Collapsed">
-            <Border Style="{StaticResource Card}" Background="#18251B" BorderBrush="#354A2A" Margin="0,0,0,18"><StackPanel><TextBlock Text="Tune your setup. See every change." FontSize="25" FontWeight="SemiBold"/><TextBlock Text="Uh FiveM Optimizer / v0.1.0" Foreground="{StaticResource Accent}" Margin="0,10,0,0"/></StackPanel></Border>
-            <Border Style="{StaticResource Card}" Margin="0,0,0,18"><StackPanel><TextBlock Text="What this version does" FontSize="19" FontWeight="SemiBold"/><TextBlock Text="Reads hardware and whole-PC resource use, locates FiveM, inspects cache size, and switches existing Windows power plans after your confirmation. It saves the original power plan for restoration." Style="{StaticResource MutedText}" Margin="0,12,0,0"/><TextBlock Text="Windows Settings shortcuts leave those decisions with you. Cache inspection is read-only; clearing cache is not offered as a routine FPS tweak." Style="{StaticResource MutedText}" Margin="0,12,0,0"/></StackPanel></Border>
-            <Border Style="{StaticResource Card}" Margin="0,0,0,18"><StackPanel><TextBlock Text="Privacy and permissions" FontSize="19" FontWeight="SemiBold"/><TextBlock Text="No accounts, analytics, ads, background service, or automatic downloads. Scans and backups stay on your PC. A diagnostic report is written only when you choose to export it; review it before sharing." Style="{StaticResource MutedText}" Margin="0,12,0,0"/><TextBlock Text="Runs with your normal Windows permissions. If a power-plan change is blocked by policy, the app reports the error. Antivirus, game files, anti-cheat, and Windows services are not modified." Style="{StaticResource MutedText}" Margin="0,12,0,0"/></StackPanel></Border>
-            <Border Style="{StaticResource Card}"><StackPanel><TextBlock Text="Verify what you run" FontSize="19" FontWeight="SemiBold"/><TextBlock Text="The source package includes the app, recovery logic, tests, and a GitHub Actions EXE build workflow. For a published release, compare its SHA-256 checksum and inspect the workflow and source commit. A checksum checks file identity; it is not a security audit or proof of reproducible builds." Style="{StaticResource MutedText}" Margin="0,12,0,0"/><TextBlock Text="Independent community tool by Uh. Not affiliated with Cfx.re or Rockstar Games. Performance depends on your hardware and server workload; this app does not measure or promise an FPS increase." Style="{StaticResource MutedText}" Margin="0,12,0,0"/></StackPanel></Border>
+            <Border Style="{StaticResource Card}" Background="{DynamicResource AccentWash}" BorderBrush="{DynamicResource AccentLine}" Margin="0,0,0,18"><StackPanel><TextBlock Text="Tune your setup. See every change." FontSize="27" FontWeight="Light"/><TextBlock x:Name="AboutVersionText" Text="Uh FiveM Optimizer / v0.2.0" Foreground="{DynamicResource Accent}" Margin="0,11,0,0"/></StackPanel></Border>
+            <Border Style="{StaticResource Card}" Margin="0,0,0,18"><StackPanel><TextBlock Text="What the app does" FontSize="19" FontWeight="SemiBold"/><TextBlock Text="Reads hardware and whole-PC resource use, locates FiveM, inspects cache size, and switches existing Windows power plans after your confirmation. The original plan is saved for recovery." Style="{StaticResource MutedText}" Margin="0,12,0,0"/><TextBlock Text="Windows Settings shortcuts leave those decisions with you. Cache inspection is read-only. Appearance colors and motion preferences are stored locally." Style="{StaticResource MutedText}" Margin="0,12,0,0"/></StackPanel></Border>
+            <Border Style="{StaticResource Card}" Margin="0,0,0,18"><StackPanel><TextBlock Text="Local, lightweight, and yours." FontSize="19" FontWeight="SemiBold"/><TextBlock Text="No accounts, analytics, ads, background service, or automatic downloads. No embedded browser. The artwork uses native vector drawing; button effects run only in response to your input. Update checks contact GitHub only when you choose to check." Style="{StaticResource MutedText}" Margin="0,12,0,0"/><TextBlock Text="Scans and backups stay on this PC. A diagnostic report is written only when you export it; review it before sharing. Normal Windows permissions are used. Antivirus, game files, anti-cheat, and services are not modified." Style="{StaticResource MutedText}" Margin="0,12,0,0"/></StackPanel></Border>
+            <Border Style="{StaticResource Card}"><StackPanel><TextBlock Text="Built to be inspected." FontSize="19" FontWeight="SemiBold"/><TextBlock Text="Public C# source, recovery tests, and the EXE build workflow are available on GitHub. Published preview releases include SHA-256 checksums and source-commit metadata. A checksum confirms file identity; it is not a security audit." Style="{StaticResource MutedText}" Margin="0,12,0,0"/><TextBlock Text="Native styling inspired by the Sylva reference supplied by Uh. Independent community tool; not affiliated with Cfx.re or Rockstar Games. Game FPS is not measured and no FPS gain is guaranteed." Style="{StaticResource MutedText}" Margin="0,12,0,0"/></StackPanel></Border>
           </StackPanel>
         </Grid>
       </ScrollViewer>
-      <Border Grid.Row="2" BorderBrush="{StaticResource Line}" BorderThickness="0,1,0,0" Padding="0,13,0,0" Margin="0,16,0,0"><TextBlock x:Name="StatusText" Text="Ready. No changes have been applied." Foreground="{StaticResource Muted}" FontSize="12"/></Border>
+      <Border Grid.Row="2" BorderBrush="{DynamicResource Line}" BorderThickness="0,1,0,0" Padding="0,13,0,0" Margin="0,18,0,0"><TextBlock x:Name="StatusText" Text="Ready. Your settings are in your hands." Foreground="{DynamicResource Muted}" FontSize="11"/></Border>
     </Grid>
   </Grid>
 </Window>

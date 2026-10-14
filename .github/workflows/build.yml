@@ -23,6 +23,15 @@ jobs:
       - name: Build, test, and publish standalone EXE
         shell: pwsh
         run: ./build.ps1
+      - name: Verify live update metadata without downloading an EXE
+        shell: pwsh
+        run: |
+          $version = (Get-Content artifacts/build-info.json -Raw | ConvertFrom-Json).version
+          dotnet run --project tests/UhOptimizer.Tests -c Release --no-build -- --live-update-check "$version"
+          if ($LASTEXITCODE -ne 0) { throw 'The live GitHub update check failed.' }
+      - name: Exercise the published EXE updater in a disposable folder
+        shell: pwsh
+        run: ./scripts/Test-UpdateInstaller.ps1
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: UhFiveMOptimizer-win-x64-${{ github.sha }}
@@ -65,5 +74,6 @@ jobs:
           $tag = 'preview-' + $env:SOURCE_SHA.Substring(0, 12)
           gh release view $tag *> $null
           if ($LASTEXITCODE -eq 0) { Write-Output 'Preview already exists; its assets will not be replaced.'; exit 0 }
-          gh release create $tag artifacts/UhFiveMOptimizer.exe artifacts/build-info.json artifacts/SHA256SUMS.txt --target "$env:SOURCE_SHA" --prerelease --title "Uh FiveM Optimizer 0.1.0 preview ($($env:SOURCE_SHA.Substring(0, 7)))" --notes-file docs/RELEASE_NOTES.md
+          $version = (Get-Content artifacts/build-info.json -Raw | ConvertFrom-Json).version
+          gh release create $tag artifacts/UhFiveMOptimizer.exe artifacts/build-info.json artifacts/SHA256SUMS.txt --target "$env:SOURCE_SHA" --prerelease --title "Uh FiveM Optimizer $version preview ($($env:SOURCE_SHA.Substring(0, 7)))" --notes-file docs/RELEASE_NOTES.md
           if ($LASTEXITCODE -ne 0) { throw 'Preview release failed.' }

@@ -29,9 +29,16 @@ public partial class MainWindow : Window
 
     public MainWindow(string dataFolder, string? smokeOutput)
     {
-        InitializeComponent();
         _dataFolder = dataFolder; _smokeOutput = smokeOutput;
+        _appearanceStore = new(dataFolder);
+        string? appearanceError = null;
+        try { _appearance = _appearanceStore.Load(); }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { appearanceError = ex.Message; }
+        ThemeManager.Apply(_appearance);
+        InitializeComponent();
         _service = new(_power, new JsonBackupStore(dataFolder));
+        InitializeAppearance(appearanceError);
+        InitializeUpdates();
         try
         {
             string settings = System.IO.Path.Combine(dataFolder, "fivem-path.txt");
@@ -47,8 +54,11 @@ public partial class MainWindow : Window
             if (_smokeOutput is not null) await SmokeTestAsync(_smokeOutput);
         };
         _timer.Tick += (_, _) => Tick();
-        Closed += (_, _) => _timer.Stop();
+        Closed += (_, _) => { _timer.Stop(); HeroScene.MotionEnabled = AppearanceScene.MotionEnabled = false; };
         SizeChanged += (_, _) => DrawGraphs();
+        Activated += (_, _) => RefreshMotion();
+        Deactivated += (_, _) => RefreshMotion();
+        StateChanged += (_, _) => RefreshMotion();
     }
 
     private void Navigate(object sender, RoutedEventArgs e) => ShowPage((string)((Button)sender).Tag);
@@ -56,16 +66,21 @@ public partial class MainWindow : Window
 
     private void ShowPage(string page)
     {
-        var pages = new[] { OverviewPage, TunePage, RestorePage, AboutPage };
-        var names = new[] { "Overview", "Tune", "Restore", "About" };
-        var buttons = new[] { OverviewNav, TuneNav, RestoreNav, AboutNav };
+        var pages = new[] { OverviewPage, TunePage, RestorePage, AppearancePage, UpdatesPage, AboutPage };
+        var names = new[] { "Overview", "Tune", "Restore", "Appearance", "Updates", "About" };
+        var buttons = new[] { OverviewNav, TuneNav, RestoreNav, AppearanceNav, UpdatesNav, AboutNav };
         for (int i = 0; i < names.Length; i++)
         {
             pages[i].Visibility = names[i] == page ? Visibility.Visible : Visibility.Collapsed;
-            buttons[i].Background = names[i] == page ? new SolidColorBrush(Color.FromRgb(35, 49, 35)) : Brushes.Transparent;
-            buttons[i].Foreground = names[i] == page ? (Brush)FindResource("Accent") : (Brush)FindResource("Muted");
+            if (names[i] == page) buttons[i].SetResourceReference(BackgroundProperty, "AccentWash");
+            else buttons[i].Background = Brushes.Transparent;
+            buttons[i].SetResourceReference(ForegroundProperty, names[i] == page ? "Accent" : "Muted");
         }
-        PageTitle.Text = page switch { "Tune" => "Make an informed change.", "Restore" => "Keep a way back.", "About" => "Built to be inspected.", _ => "Know your setup." };
+        PageTitle.Text = page switch { "Tune" => "Tune, on your terms.", "Restore" => "Keep a way back.", "Appearance" => "A setup that feels like yours.", "Updates" => "Keep your toolkit current.", "About" => "Built to be inspected.", _ => "Your setup, at a glance." };
+        PageScroll.ScrollToTop();
+        ScanButton.Visibility = page == "Appearance" ? Visibility.Collapsed : Visibility.Visible;
+        AppearanceSaveHeader.Visibility = page == "Appearance" ? Visibility.Visible : Visibility.Collapsed;
+        RefreshMotion();
         if (page == "Restore") RefreshBackup();
         if (page == "Overview") Dispatcher.BeginInvoke(DrawGraphs);
     }
@@ -225,7 +240,7 @@ public partial class MainWindow : Window
         if (save.ShowDialog(this) != true) return;
         try
         {
-            var report = new { App = "Uh FiveM Optimizer", Version = "0.1.0", ExportedUtc = DateTimeOffset.UtcNow, Privacy = "Local export; installation paths may contain your Windows account name. Review before sharing.", Scan = _scan, Samples = _samples.ToArray(), Metrics = "Whole-PC CPU and RAM; not game FPS or a benchmark." };
+            var report = new { App = "Uh FiveM Optimizer", Version = AppBuild.Version, ExportedUtc = DateTimeOffset.UtcNow, Privacy = "Local export; installation paths may contain your Windows account name. Review before sharing.", Scan = _scan, Samples = _samples.ToArray(), Metrics = "Whole-PC CPU and RAM; not game FPS or a benchmark." };
             File.WriteAllText(save.FileName, JsonSerializer.Serialize(report, new JsonSerializerOptions { WriteIndented = true }));
             Status("Report exported. Review installation paths before sharing it.");
         }
@@ -239,8 +254,12 @@ public partial class MainWindow : Window
             var sample = _scanner.Sample(); _samples.Add(sample); if (_samples.Count > 60) _samples.RemoveAt(0);
             LiveCpu.Text = sample.CpuPercent is double cpu ? $"CPU  /  {cpu:0}%" : "CPU  /  collecting sample";
             LiveRam.Text = $"RAM  /  {sample.MemoryPercent:0}%";
-            if (_samples.Count % 5 == 0 || _samples.Count == 1)
-                FiveMValue.Text = _scan?.FiveMFolder is null ? "Not located yet" : "Installation found · " + WindowsScanner.FiveMState();
+            if (++_sampleTicks % 5 == 0 || _sampleTicks == 1)
+            {
+                string state = WindowsScanner.FiveMState(); _fiveMRunning = state == "Running";
+                FiveMValue.Text = _scan?.FiveMFolder is null ? "Not located yet" : "Installation found · " + state;
+            }
+            RefreshMotion();
             DrawGraphs();
         }
         catch (Exception ex) { _timer.Stop(); Status("Live readings paused: " + ex.Message, true); }
@@ -249,8 +268,8 @@ public partial class MainWindow : Window
     private void DrawGraphs()
     {
         if (CpuGraph is null || RamGraph is null) return;
-        DrawGraph(CpuGraph, _samples.Select(s => s.CpuPercent).ToList(), Color.FromRgb(181, 243, 107));
-        DrawGraph(RamGraph, _samples.Select(s => (double?)s.MemoryPercent).ToList(), Color.FromRgb(112, 183, 239));
+        DrawGraph(CpuGraph, _samples.Select(s => s.CpuPercent).ToList(), ((SolidColorBrush)FindResource("Accent")).Color);
+        DrawGraph(RamGraph, _samples.Select(s => (double?)s.MemoryPercent).ToList(), ((SolidColorBrush)FindResource("ChartSecondary")).Color);
     }
 
     private static void DrawGraph(Canvas canvas, IReadOnlyList<double?> values, Color color)
@@ -280,22 +299,48 @@ public partial class MainWindow : Window
         try
         {
             Directory.CreateDirectory(output);
+            string loadedAccent = _appearance.AccentHex;
+            async Task Capture(string name)
+            {
+                UpdateLayout(); await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.Render);
+                var visual = (FrameworkElement)Content;
+                var image = new RenderTargetBitmap((int)visual.ActualWidth, (int)visual.ActualHeight, 96, 96, PixelFormats.Pbgra32);
+                image.Render(visual); var encoder = new PngBitmapEncoder(); encoder.Frames.Add(BitmapFrame.Create(image));
+                using var file = File.Create(System.IO.Path.Combine(output, name + ".png")); encoder.Save(file);
+            }
             await Task.Delay(2200); // A real second CPU sample; no mock readings.
             Tick();
             foreach (bool compact in new[] { false, true })
             {
                 if (compact) { Width = MinWidth; Height = MinHeight; }
-                foreach (string page in new[] { "Overview", "Tune", "Restore", "About" })
+                foreach (string page in new[] { "Overview", "Tune", "Restore", "Appearance", "Updates", "About" })
                 {
-                    ShowPage(page); UpdateLayout(); await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.Render);
-                    var visual = (FrameworkElement)Content;
-                    var image = new RenderTargetBitmap((int)visual.ActualWidth, (int)visual.ActualHeight, 96, 96, PixelFormats.Pbgra32);
-                    image.Render(visual); var encoder = new PngBitmapEncoder(); encoder.Frames.Add(BitmapFrame.Create(image));
-                    using var file = File.Create(System.IO.Path.Combine(output, page.ToLowerInvariant() + (compact ? "-compact" : "") + ".png")); encoder.Save(file);
+                    ShowPage(page); await Capture(page.ToLowerInvariant() + (compact ? "-compact" : ""));
                 }
             }
-            File.WriteAllText(System.IO.Path.Combine(output, "smoke-result.json"), JsonSerializer.Serialize(new { Success = _scan is not null, _scan, PowerError = _powerError, SampleCount = _samples.Count, SystemChangesApplied = false }, new JsonSerializerOptions { WriteIndented = true }));
-            Application.Current.Shutdown(_scan is null ? 1 : 0);
+            Width = 1280; Height = 900; ShowPage("Appearance");
+            PreviewAppearance(new() { AccentHex = "#80C7FF", ReduceMotion = true });
+            SaveAppearanceClick(this, new RoutedEventArgs());
+            bool themeSaved = _appearanceStore.Load().AccentHex == "#80C7FF" && _appearanceStore.Load().ReduceMotion;
+            CustomColorInput.Text = "#BAD!!"; PreviewColorClick(this, new RoutedEventArgs());
+            bool invalidColorBlocked = _appearance.AccentHex == "#80C7FF" && _appearanceStore.Load().AccentHex == "#80C7FF";
+            SyncAppearanceControls(); SaveAppearanceClick(this, new RoutedEventArgs()); await Capture("appearance-blue");
+            PageScroll.ScrollToEnd(); await Capture("appearance-motion");
+            bool reducedStops = !HeroScene.IsAnimating && !AppearanceScene.IsAnimating;
+            _presetButtons.First(p => p.Hex == "#FF9FB4").Button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            ShowPage("Overview"); await Capture("overview-rose");
+            PreviewAppearance(new()); ShowPage("Overview");
+            int initialFrames = HeroScene.FrameCount; HeroScene.MotionEnabled = true;
+            await Task.Delay(350);
+            bool motionTicks = HeroScene.FrameCount > initialFrames;
+            ShowPage("Tune"); bool hiddenStops = !HeroScene.IsAnimating && !AppearanceScene.IsAnimating;
+            PlanPicker.IsDropDownOpen = true; await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.Render);
+            bool dropdownOpens = PlanPicker.IsDropDownOpen && PlanPicker.Items.Count > 0; PlanPicker.IsDropDownOpen = false;
+            _fiveMRunning = true; RefreshMotion(); bool gamingStops = !HeroScene.MotionEnabled && !AppearanceScene.MotionEnabled;
+            _fiveMRunning = false;
+            bool success = _scan is not null && themeSaved && invalidColorBlocked && reducedStops && motionTicks && hiddenStops && gamingStops;
+            File.WriteAllText(System.IO.Path.Combine(output, "smoke-result.json"), JsonSerializer.Serialize(new { Success = success, _scan, PowerError = _powerError, SampleCount = _samples.Count, LoadedAccent = loadedAccent, ThemeSaved = themeSaved, InvalidColorBlocked = invalidColorBlocked, ReducedMotionStopsTimers = reducedStops, NativeMotionTicks = motionTicks, HiddenPagesStopTimers = hiddenStops, GamingPausesMotion = gamingStops, PlanDropdownOpens = dropdownOpens, SystemChangesApplied = false, UpdateNetworkRequests = 0 }, new JsonSerializerOptions { WriteIndented = true }));
+            Application.Current.Shutdown(success ? 0 : 1);
         }
         catch (Exception ex) { File.WriteAllText(System.IO.Path.Combine(output, "smoke-error.txt"), ex.ToString()); Application.Current.Shutdown(1); }
     }

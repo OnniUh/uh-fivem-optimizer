@@ -1,5 +1,13 @@
 using UhOptimizer.Core;
 
+if (args.Length == 2 && args[0] == "--live-update-check")
+{
+    using var http = UpdateClient.CreateHttpClient();
+    var result = await new UpdateClient(http).CheckAsync(args[1]);
+    Console.WriteLine("Live GitHub update check passed. Latest compatible version: " + result.LatestVersion + "; newer version available: " + (result.Available is not null) + ". No EXE was downloaded.");
+    return 0;
+}
+
 // Dependency-free behavioral tests. Power writes use a fake, never Windows.
 int passed = 0, failed = 0;
 void Test(string name, Action body)
@@ -117,6 +125,7 @@ try
     {
         var cancel = new CancellationToken(true); Throws(() => FiveMPaths.InspectCache(Path.Combine(temp, "FiveM", "FiveM.app", "data"), cancel));
     });
+    FeatureTests.Run(Test, temp);
 }
 finally { Directory.Delete(temp, recursive: true); }
 Console.WriteLine($"\n{passed} passed; {failed} failed. No Windows settings were changed.");

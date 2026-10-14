@@ -17,7 +17,9 @@ try {
     if (!$sourceCommit) { $sourceCommit = 'local-uncommitted-build' }
     $sdk = & dotnet --version
     if ($LASTEXITCODE -ne 0) { throw 'Could not read .NET SDK version.' }
-    [ordered]@{ app = 'Uh FiveM Optimizer'; version = '0.1.0'; sourceCommit = "$sourceCommit"; sdk = "$sdk"; target = 'win-x64'; selfContained = $true; builtUtc = [DateTimeOffset]::UtcNow.ToString('O') } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $output 'build-info.json') -Encoding utf8NoBOM
+    $version = (& dotnet msbuild src/UhOptimizer.App/UhOptimizer.App.csproj -nologo -getProperty:Version).Trim()
+    if ($LASTEXITCODE -ne 0 -or $version -notmatch '^\d+\.\d+\.\d+$') { throw 'Could not read the app version.' }
+    [ordered]@{ app = 'Uh FiveM Optimizer'; version = "$version"; sourceCommit = "$sourceCommit"; sdk = "$sdk"; target = 'win-x64'; selfContained = $true; builtUtc = [DateTimeOffset]::UtcNow.ToString('O') } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $output 'build-info.json') -Encoding utf8NoBOM
     $lines = foreach ($name in @('UhFiveMOptimizer.exe', 'build-info.json')) {
         $hash = (Get-FileHash -LiteralPath (Join-Path $output $name) -Algorithm SHA256).Hash.ToLowerInvariant()
         "$hash  $name"
