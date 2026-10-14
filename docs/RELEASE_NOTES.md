@@ -11,6 +11,7 @@ Adds reviewed optimization choices to the native UI, with file recovery and perm
 - **Launch FiveM**: starts the selected launcher and minimizes the optimizer without automatically deleting files, changing power plans or closing apps.
 - Preserves saved themes, native motion controls, power-plan recovery, diagnostics and verified in-app updates.
 - Fixes update checks when GitHub returns older releases first: scans the bounded feed and selects the highest compatible numeric version, with mixed-order regression tests and a real-feed probe simulating an older client.
+- Publishes the helper-ready signal atomically and retries transient read locks during update handoff.
 
 Windows CI runs behavioral file/recovery/cleanup/update tests, requires junction and hard-link safety checks, and exercises the actual published EXE's update helper and rollback in a disposable folder. The UI smoke test renders all seven pages at two sizes and round-trips disposable graphics settings.
 

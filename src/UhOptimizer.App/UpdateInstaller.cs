@@ -39,7 +39,8 @@ public static class UpdateInstaller
             for (int i = 0; i < 450; i++)
             {
                 token.ThrowIfCancellationRequested();
-                if (File.Exists(ready) && File.ReadAllText(ready) == update.Sha256) return;
+                try { if (File.Exists(ready) && File.ReadAllText(ready) == update.Sha256) return; }
+                catch (IOException) { /* A transient file lock must not cancel a valid handoff. */ }
                 if (worker.HasExited) throw new IOException("The update helper could not prepare the installation. The current app is unchanged.");
                 await Task.Delay(100, token);
             }
@@ -86,7 +87,8 @@ public static class UpdateInstaller
             // Permission or disk-space failures therefore leave the current app running.
             File.Copy(self, staged, overwrite: false);
             if (await UpdateClient.FileHashAsync(staged) != hash) throw new InvalidDataException("The staged update failed verification.");
-            File.WriteAllText(Path.Combine(folder, "ready-" + request.Nonce), hash);
+            // Publish only after the complete marker is flushed and its writer is closed.
+            LocalFiles.Write(Path.Combine(folder, "ready-" + request.Nonce), System.Text.Encoding.UTF8.GetBytes(hash));
             using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(35));
             while (!parent.HasExited)
             {

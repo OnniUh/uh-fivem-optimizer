@@ -49,6 +49,6 @@ public static class UpdateProbe
         }
         catch (Exception ex) { Report(folder, false, ex.ToString()); Application.Current.Shutdown(1); }
     }
-    private static void Report(string folder, bool success, string message) => File.WriteAllText(Path.Combine(folder, "probe-result.json"),
-        JsonSerializer.Serialize(new { Success = success, Version = AppBuild.Version, Message = message }, new JsonSerializerOptions { WriteIndented = true }));
+    private static void Report(string folder, bool success, string message) => LocalFiles.Write(Path.Combine(folder, "probe-result.json"),
+        JsonSerializer.SerializeToUtf8Bytes(new { Success = success, Version = AppBuild.Version, Message = message }, new JsonSerializerOptions { WriteIndented = true }));
 }
