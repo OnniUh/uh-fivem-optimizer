@@ -2,7 +2,7 @@
 
 **Tune your setup. See every change.** A small, open-source Windows desktop app by Uh for FiveM players.
 
-> Version 0.3.0 adds a reversible low-end graphics preset, reviewed temporary-file cleanup, and an experimental importer for the linked community visual pack. It does not measure game FPS or guarantee a performance increase. Test on a few PCs before recommending it to all players.
+> Version 0.3.1 adds a reversible low-end graphics preset, reviewed temporary-file cleanup, and an experimental importer for the linked community visual pack, plus a release-order fix for the updater. It does not measure game FPS or guarantee a performance increase. Test on a few PCs before recommending it to all players.
 
 ## Download
 
@@ -12,7 +12,7 @@ Run the EXE as a normal user. No installer or separate .NET installation is need
 
 Requires a currently supported x64 Windows 10/11 environment compatible with .NET 10. ARM64 and Windows 7/8 are not targeted. Keep Windows and your graphics driver updated through their official channels.
 
-## Included in v0.3.0
+## Included in v0.3.1
 
 - **Low-end graphics (GTA V Legacy)**: preview supported changes to FiveM's `gta5_settings.xml` in the recognized version-27 format, back up the complete original file, apply atomically, and verify. Reduces graphics quality, MSAA and draw distance; preserves unknown fields, GPU/monitor selection, refresh rate, controls and VSync. Resolution stays unchanged unless the optional cap of 1280×720 is selected; dimensions already smaller are preserved. Other settings formats are refused; use in-game graphics settings for Enhanced.
 - **Temporary-file cleanup**: preview old files in user Temp, `%TEMP%` and Windows Temp. Only files created **and** modified more than seven days ago are candidates. A redirected `%TEMP%` must be a local folder named `Temp`; other redirected paths are excluded with a notice. No drive-root, network or linked roots. No recursive directory deletion.
@@ -53,7 +53,7 @@ All tuning and deletion require a review. FiveM and GTA V must be closed before 
 9. To try the legacy visual pack separately, download its ZIP from the original thread and choose **Preview downloaded ZIP**. Only the supported archive layout is accepted. Restore that pack if loading or visuals break.
 10. Launch FiveM and compare the same server/scene under similar player load. Graphics reductions help rendering bottlenecks; server scripts, CPU limits and assets can dominate. Moving from 30–40 FPS to 80–90 FPS is **not a promised outcome**.
 
-Version 0.1.0 does not contain the updater: install the current EXE manually once. Version 0.2.0 and later can install newer releases through the Updates page. Each newer version still requires one complete EXE download; checking an installed version does not redownload it. Canceled partial downloads are discarded; completed verified downloads can be reused when installation is retried.
+**Install 0.3.1 manually once if you have 0.1.0, 0.2.0 or 0.3.0.** Earlier update checkers assumed newest-first release ordering, and can miss newer versions on the current feed. Version 0.3.1 scans the entire bounded page and chooses the largest compatible numeric version regardless of order. Subsequent newer versions can install through Updates. Each new version still requires one complete EXE download; checking an installed version does not redownload it. Canceled partial downloads are discarded; completed verified downloads can be reused for installation retries.
 
 Higher-performance power plans can increase heat, fan noise, and battery use. Some PCs expose only one plan or use Windows Power mode instead. The app respects the plans that Windows exposes. A server with expensive scripts or assets can remain slow regardless of PC settings.
 
@@ -120,7 +120,7 @@ docs/                     Release notes and manual validation checklist
 
 ## Current limits
 
-This version does not include in-game frame-time capture, FiveM cache deletion, driver installation, overlays, or unattended updates. Graphics edits and the original visual pack require pilot testing with current FiveM builds and the target server; automated fixtures prove file handling, not game compatibility or FPS improvements. Real power-plan apply/restore should also be validated on a pilot PC; automated tests simulate those writes. Update checks use the newest compatible published release from the most recent 20 releases; bump the app's numeric project version when publishing an update. A release with the same numeric version is not offered again.
+This version does not include in-game frame-time capture, FiveM cache deletion, driver installation, overlays, or unattended updates. Graphics edits and the original visual pack require pilot testing with current FiveM builds and the target server; automated fixtures prove file handling, not game compatibility or FPS improvements. Real power-plan apply/restore should also be validated on a pilot PC; automated tests simulate those writes. Update checks choose the largest compatible numeric version in the first 20 releases returned by GitHub, without relying on release order; older pages are not searched. Bump the numeric project version when publishing an update. A release with the same version is not offered again.
 
 ## References
 

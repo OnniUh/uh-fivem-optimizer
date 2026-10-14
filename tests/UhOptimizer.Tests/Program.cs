@@ -1,9 +1,11 @@
 using UhOptimizer.Core;
 
-if (args.Length == 2 && args[0] == "--live-update-check")
+if (args.Length is 2 or 3 && args[0] == "--live-update-check")
 {
     using var http = UpdateClient.CreateHttpClient();
     var result = await new UpdateClient(http).CheckAsync(args[1]);
+    if (args.Length == 3 && (result.Available is null || UpdateClient.ParseVersion(result.Available.Version) <= UpdateClient.ParseVersion(args[1])))
+        throw new Exception("Expected a newer release for the simulated older client.");
     Console.WriteLine("Live GitHub update check passed. Latest compatible version: " + result.LatestVersion + "; newer version available: " + (result.Available is not null) + ". No EXE was downloaded.");
     return 0;
 }

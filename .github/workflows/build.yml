@@ -29,6 +29,8 @@ jobs:
           $version = (Get-Content artifacts/build-info.json -Raw | ConvertFrom-Json).version
           dotnet run --project tests/UhOptimizer.Tests -c Release --no-build -- --live-update-check "$version"
           if ($LASTEXITCODE -ne 0) { throw 'The live GitHub update check failed.' }
+          dotnet run --project tests/UhOptimizer.Tests -c Release --no-build -- --live-update-check "0.2.0" --expect-newer
+          if ($LASTEXITCODE -ne 0) { throw 'The release-order regression probe failed to offer an update to the simulated older client.' }
       - name: Exercise the published EXE updater in a disposable folder
         shell: pwsh
         run: ./scripts/Test-UpdateInstaller.ps1

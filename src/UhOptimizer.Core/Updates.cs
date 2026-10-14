@@ -52,7 +52,8 @@ public sealed class UpdateClient(HttpClient http)
         byte[] listing = await ReadSmallAsync(new Uri(Api + "/releases?per_page=20"), 2_000_000, token);
         using var doc = JsonDocument.Parse(listing);
         if (doc.RootElement.ValueKind != JsonValueKind.Array) throw new InvalidDataException("GitHub returned an invalid release list.");
-        UpdateCandidate? best = null; Version latest = new(0, 0, 0); bool found = false;
+        Version latest = new(0, 0, 0); bool found = false;
+        (JsonElement Exe, JsonElement Info, JsonElement Sums, string Tag, BuildManifest Manifest)? selected = null;
         foreach (var release in doc.RootElement.EnumerateArray())
         {
             if (release.GetProperty("draft").GetBoolean()) continue;
@@ -71,8 +72,18 @@ public sealed class UpdateClient(HttpClient http)
             string source = manifest.SourceCommit;
             if (!Regex.IsMatch(source, "^[a-f0-9]{40}$") || release.GetProperty("target_commitish").GetString() != source)
                 throw new InvalidDataException("The release and its recorded source commit do not match.");
-            found = true; if (version > latest) latest = version;
-            if (version <= current) break; // Newest compatible published release: checks never fetch an EXE.
+            found = true;
+            // GitHub release ordering is not a version ordering. Inspect the entire bounded page.
+            if (version > latest)
+            {
+                latest = version;
+                if (version > current) selected = (exe, info, sums, tag, manifest);
+            }
+        }
+        if (!found) throw new InvalidDataException("No compatible published Windows release was found. Try again after a release is published.");
+        if (selected is not { } choice) return new(latest.ToString(3), null);
+        {
+            var (exe, info, sums, tag, manifest) = choice;
             long size = exe.GetProperty("size").GetInt64();
             if (size < 10_000 || size > 512L * 1024 * 1024) throw new InvalidDataException("The update size is outside the supported range.");
             var sumsUri = AssetUri(sums, tag, "SHA256SUMS.txt");
@@ -89,11 +100,9 @@ public sealed class UpdateClient(HttpClient http)
                 !hashes.TryGetValue("build-info.json", out var expectedInfo) || expectedInfo != Digest(info))
                 throw new InvalidDataException("The release checksums are incomplete or inconsistent.");
             string releaseUrl = ReleasesUrl + "/tag/" + Uri.EscapeDataString(tag);
-            best = new(manifest.Version, tag, source, releaseUrl, AssetUri(exe, tag, "UhFiveMOptimizer.exe"), size, exeHash);
-            break;
+            var best = new UpdateCandidate(manifest.Version, tag, manifest.SourceCommit, releaseUrl, AssetUri(exe, tag, "UhFiveMOptimizer.exe"), size, exeHash);
+            return new(latest.ToString(3), best);
         }
-        if (!found) throw new InvalidDataException("No compatible published Windows release was found. Try again after a release is published.");
-        return new(latest.ToString(3), best);
     }
 
     public async Task<string> DownloadAsync(UpdateCandidate candidate, string cacheRoot, IProgress<UpdateProgress>? progress, CancellationToken cancellation = default)
@@ -155,7 +164,7 @@ public sealed class UpdateClient(HttpClient http)
                 uri.Host is not ("api.github.com" or "github.com" or "release-assets.githubusercontent.com" or "objects.githubusercontent.com"))
                 throw new InvalidDataException("An update request was redirected outside GitHub's approved HTTPS hosts.");
             using var request = new HttpRequestMessage(HttpMethod.Get, uri);
-            request.Headers.UserAgent.ParseAdd("UhFiveMOptimizer/0.3.0");
+            request.Headers.UserAgent.ParseAdd("UhFiveMOptimizer/0.3.1");
             if (uri.Host == "api.github.com") { request.Headers.Accept.ParseAdd("application/vnd.github+json"); request.Headers.Add("X-GitHub-Api-Version", "2022-11-28"); }
             var response = await http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token);
             if ((int)response.StatusCode is 301 or 302 or 303 or 307 or 308)

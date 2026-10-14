@@ -62,6 +62,41 @@ static class FeatureTests
         {
             using var fixture = new ReleaseFixture("0.1.0"); Assert(fixture.Client.CheckAsync("0.2.0").GetAwaiter().GetResult().Available is null);
         });
+        const string listingUrl = "https://api.github.com/repos/" + UpdateClient.Repository + "/releases?per_page=20";
+        void Merge(ReleaseFixture destination, params ReleaseFixture[] ordered)
+        {
+            var listing = new JsonArray();
+            foreach (var fixture in ordered)
+            {
+                listing.Add(JsonNode.Parse(fixture.Handler.Data[listingUrl])![0]!.DeepClone());
+                foreach (var pair in fixture.Handler.Data.Where(p => p.Key != listingUrl)) destination.Handler.Data[pair.Key] = pair.Value;
+            }
+            destination.Handler.Data[listingUrl] = JsonSerializer.SerializeToUtf8Bytes(listing);
+        }
+        test("Oldest-first release listings offer the highest numeric version", () =>
+        {
+            using var old = new ReleaseFixture("0.1.0", tag: "preview-111111111111");
+            using var current = new ReleaseFixture("0.2.0", tag: "preview-222222222222");
+            using var newest = new ReleaseFixture("0.10.0", tag: "preview-333333333333");
+            Merge(old, old, current, newest);
+            var check = old.Client.CheckAsync("0.2.0").GetAwaiter().GetResult();
+            Assert(check.LatestVersion == "0.10.0" && check.Available?.DownloadUrl.AbsoluteUri == newest.ExeUrl);
+            Assert(!old.Handler.Requests.Any(u => u.EndsWith(".exe")) && old.Handler.Requests.Count(u => u.EndsWith("SHA256SUMS.txt")) == 1);
+        });
+        test("Unsorted releases choose the largest version even when a newer publication is a rollback", () =>
+        {
+            using var first = new ReleaseFixture("0.3.0", tag: "preview-111111111111");
+            using var max = new ReleaseFixture("0.10.0", tag: "preview-222222222222");
+            using var last = new ReleaseFixture("0.4.0", tag: "preview-333333333333");
+            Merge(first, first, max, last); Assert(first.Client.CheckAsync("0.2.0").GetAwaiter().GetResult().Available?.Version == "0.10.0");
+        });
+        test("Up-to-date checks scan older entries without downloading checksums or offering downgrade", () =>
+        {
+            using var old = new ReleaseFixture("0.1.0", tag: "preview-111111111111");
+            using var current = new ReleaseFixture("0.3.1", tag: "preview-222222222222"); Merge(old, old, current);
+            var check = old.Client.CheckAsync("0.3.1").GetAwaiter().GetResult();
+            Assert(check.Available is null && check.LatestVersion == "0.3.1" && old.Handler.Requests.Count == 3);
+        });
         test("Tampered build metadata is rejected", () =>
         {
             using var fixture = new ReleaseFixture("0.3.0"); fixture.Handler.Data[fixture.InfoUrl] = Encoding.UTF8.GetBytes("{tampered}");
@@ -156,11 +191,12 @@ static class FeatureTests
         public UpdateClient Client { get; }
         public readonly byte[] ExeBytes = new byte[200_000];
         public string ExeHash { get; }
-        public const string Tag = "preview-aaaaaaaaaaaa";
+        public string Tag { get; }
         public string ExeUrl => UpdateClient.ReleasesUrl + "/download/" + Tag + "/UhFiveMOptimizer.exe";
         public string InfoUrl => UpdateClient.ReleasesUrl + "/download/" + Tag + "/build-info.json";
-        public ReleaseFixture(string version, Action<JsonObject>? change = null)
+        public ReleaseFixture(string version, Action<JsonObject>? change = null, string tag = "preview-aaaaaaaaaaaa")
         {
+            Tag = tag;
             ExeBytes[0] = (byte)'M'; ExeBytes[1] = (byte)'Z'; ExeHash = Hash(ExeBytes);
             byte[] info = JsonSerializer.SerializeToUtf8Bytes(new { app = "Uh FiveM Optimizer", version, sourceCommit = new string('a', 40), target = "win-x64", selfContained = true });
             byte[] sums = Encoding.UTF8.GetBytes(ExeHash + "  UhFiveMOptimizer.exe\n" + Hash(info) + "  build-info.json\n");
