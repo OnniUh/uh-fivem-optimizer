@@ -1,0 +1,69 @@
+name: Build Windows preview
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        with:
+          global-json-file: global.json
+      - name: Build, test, and publish standalone EXE
+        shell: pwsh
+        run: ./build.ps1
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: UhFiveMOptimizer-win-x64-${{ github.sha }}
+          path: |
+            artifacts/UhFiveMOptimizer.exe
+            artifacts/build-info.json
+            artifacts/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 30
+
+  preview-release:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: windows-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Download this run's built artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+          ARTIFACT_NAME: UhFiveMOptimizer-win-x64-${{ github.sha }}
+        shell: pwsh
+        run: |
+          gh run download "$env:RUN_ID" --name "$env:ARTIFACT_NAME" --dir artifacts
+          if ($LASTEXITCODE -ne 0) { throw 'Artifact download failed.' }
+      - name: Publish a separate preview for this exact source commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          SOURCE_SHA: ${{ github.sha }}
+        shell: pwsh
+        run: |
+          $tag = 'preview-' + $env:SOURCE_SHA.Substring(0, 12)
+          gh release view $tag *> $null
+          if ($LASTEXITCODE -eq 0) { Write-Output 'Preview already exists; its assets will not be replaced.'; exit 0 }
+          gh release create $tag artifacts/UhFiveMOptimizer.exe artifacts/build-info.json artifacts/SHA256SUMS.txt --target "$env:SOURCE_SHA" --prerelease --title "Uh FiveM Optimizer 0.1.0 preview ($($env:SOURCE_SHA.Substring(0, 7)))" --notes-file docs/RELEASE_NOTES.md
+          if ($LASTEXITCODE -ne 0) { throw 'Preview release failed.' }

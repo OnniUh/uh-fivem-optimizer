@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/UhOptimizer.App/UhOptimizer.App.csproj" />
+    <Project Path="src/UhOptimizer.Core/UhOptimizer.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/UhOptimizer.Tests/UhOptimizer.Tests.csproj" />
+  </Folder>
+</Solution>
