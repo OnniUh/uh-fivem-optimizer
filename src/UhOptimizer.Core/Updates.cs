@@ -155,7 +155,7 @@ public sealed class UpdateClient(HttpClient http)
                 uri.Host is not ("api.github.com" or "github.com" or "release-assets.githubusercontent.com" or "objects.githubusercontent.com"))
                 throw new InvalidDataException("An update request was redirected outside GitHub's approved HTTPS hosts.");
             using var request = new HttpRequestMessage(HttpMethod.Get, uri);
-            request.Headers.UserAgent.ParseAdd("UhFiveMOptimizer/0.2.0");
+            request.Headers.UserAgent.ParseAdd("UhFiveMOptimizer/0.3.0");
             if (uri.Host == "api.github.com") { request.Headers.Accept.ParseAdd("application/vnd.github+json"); request.Headers.Add("X-GitHub-Api-Version", "2022-11-28"); }
             var response = await http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token);
             if ((int)response.StatusCode is 301 or 302 or 303 or 307 or 308)

@@ -51,6 +51,7 @@ public partial class MainWindow
 
     private async void InstallUpdateClick(object sender, RoutedEventArgs e)
     {
+        if (_busy) { Status("Finish the current scan or optimization before installing an update."); return; }
         if (_updateBusy || _updateCandidate is not { } candidate || !AppBuild.SupportsSelfUpdate) return;
         if (MessageBox.Show(this, $"Download v{candidate.Version} ({candidate.Size / 1048576d:0.#} MB), verify it, and restart the app?\n\nThe EXE will be replaced in its current folder. Your saved appearance and power-plan backup will be kept. The previous EXE will be retained beside it as a .previous file.\n\nContinue?", "Install update", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) != MessageBoxResult.Yes) return;
         _updateCancellation = new(); SetUpdateBusy(true); UpdateTitle.Text = "Downloading your update…";
@@ -75,6 +76,7 @@ public partial class MainWindow
     private void SetUpdateBusy(bool busy)
     {
         _updateBusy = busy; CheckUpdateButton.IsEnabled = !busy; CancelUpdateButton.IsEnabled = busy;
+        RefreshOptimizationControls();
         InstallUpdateButton.IsEnabled = !busy && _updateCandidate is not null && AppBuild.SupportsSelfUpdate;
     }
     private void CancelUpdateClick(object sender, RoutedEventArgs e) => _updateCancellation?.Cancel();

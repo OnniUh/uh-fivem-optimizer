@@ -8,7 +8,7 @@ namespace UhOptimizer.App;
 
 public static class AppBuild
 {
-    public static string Version => typeof(App).Assembly.GetName().Version?.ToString(3) ?? "0.2.0";
+    public static string Version => typeof(App).Assembly.GetName().Version?.ToString(3) ?? "0.3.0";
 #if SINGLE_FILE
     public static bool SupportsSelfUpdate => true;
 #else

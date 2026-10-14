@@ -39,6 +39,7 @@ public partial class MainWindow : Window
         _service = new(_power, new JsonBackupStore(dataFolder));
         InitializeAppearance(appearanceError);
         InitializeUpdates();
+        InitializeOptimizations();
         try
         {
             string settings = System.IO.Path.Combine(dataFolder, "fivem-path.txt");
@@ -62,13 +63,13 @@ public partial class MainWindow : Window
     }
 
     private void Navigate(object sender, RoutedEventArgs e) => ShowPage((string)((Button)sender).Tag);
-    private void OpenTune(object sender, RoutedEventArgs e) => ShowPage("Tune");
+    private void OpenTune(object sender, RoutedEventArgs e) => ShowPage("Optimize");
 
     private void ShowPage(string page)
     {
-        var pages = new[] { OverviewPage, TunePage, RestorePage, AppearancePage, UpdatesPage, AboutPage };
-        var names = new[] { "Overview", "Tune", "Restore", "Appearance", "Updates", "About" };
-        var buttons = new[] { OverviewNav, TuneNav, RestoreNav, AppearanceNav, UpdatesNav, AboutNav };
+        var pages = new[] { OverviewPage, TunePage, OptimizePage, RestorePage, AppearancePage, UpdatesPage, AboutPage };
+        var names = new[] { "Overview", "Tune", "Optimize", "Restore", "Appearance", "Updates", "About" };
+        var buttons = new[] { OverviewNav, TuneNav, OptimizeNav, RestoreNav, AppearanceNav, UpdatesNav, AboutNav };
         for (int i = 0; i < names.Length; i++)
         {
             pages[i].Visibility = names[i] == page ? Visibility.Visible : Visibility.Collapsed;
@@ -76,12 +77,12 @@ public partial class MainWindow : Window
             else buttons[i].Background = Brushes.Transparent;
             buttons[i].SetResourceReference(ForegroundProperty, names[i] == page ? "Accent" : "Muted");
         }
-        PageTitle.Text = page switch { "Tune" => "Tune, on your terms.", "Restore" => "Keep a way back.", "Appearance" => "A setup that feels like yours.", "Updates" => "Keep your toolkit current.", "About" => "Built to be inspected.", _ => "Your setup, at a glance." };
+        PageTitle.Text = page switch { "Tune" => "Tune, on your terms.", "Optimize" => "Performance, with clear tradeoffs.", "Restore" => "Keep a way back.", "Appearance" => "A setup that feels like yours.", "Updates" => "Keep your toolkit current.", "About" => "Built to be inspected.", _ => "Your setup, at a glance." };
         PageScroll.ScrollToTop();
         ScanButton.Visibility = page == "Appearance" ? Visibility.Collapsed : Visibility.Visible;
         AppearanceSaveHeader.Visibility = page == "Appearance" ? Visibility.Visible : Visibility.Collapsed;
         RefreshMotion();
-        if (page == "Restore") RefreshBackup();
+        if (page == "Restore") { RefreshBackup(); RefreshFileRecovery(); }
         if (page == "Overview") Dispatcher.BeginInvoke(DrawGraphs);
     }
 
@@ -165,6 +166,7 @@ public partial class MainWindow : Window
     {
         _busy = busy; ScanButton.IsEnabled = !busy; PlanPicker.IsEnabled = !busy;
         RefreshBackup();
+        RefreshOptimizationControls();
     }
 
     private void ApplyClick(object sender, RoutedEventArgs e)
@@ -310,12 +312,26 @@ public partial class MainWindow : Window
             }
             await Task.Delay(2200); // A real second CPU sample; no mock readings.
             Tick();
+            // New feature integration uses only disposable files beneath the smoke directory.
+            string fixture = System.IO.Path.Combine(output, "fixture", "gta5_settings.xml");
+            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(fixture)!);
+            string originalFixture = "<Settings><version value=\"27\"/><graphics><ShadowQuality value=\"3\"/><TextureQuality value=\"2\"/><MSAA value=\"4\"/><PostFX value=\"3\"/><LodScale value=\"1.0\"/></graphics><video><ScreenWidth value=\"1920\"/><ScreenHeight value=\"1080\"/></video></Settings>";
+            File.WriteAllText(fixture, originalFixture);
+            var fixtureService = new FileTuningService(System.IO.Path.Combine(output, "fixture-backup"), p => LocalFiles.Inside(p, System.IO.Path.Combine(output, "fixture")));
+            if (fixtureService.Load() is { Status: not "Restored" }) fixtureService.Restore(true);
+            fixtureService.Apply(LowEndGraphics.Preview(fixture, true)); fixtureService.Restore();
+            bool graphicsFixtureRestored = File.ReadAllText(fixture) == originalFixture;
             foreach (bool compact in new[] { false, true })
             {
                 if (compact) { Width = MinWidth; Height = MinHeight; }
-                foreach (string page in new[] { "Overview", "Tune", "Restore", "Appearance", "Updates", "About" })
+                foreach (string page in new[] { "Overview", "Tune", "Optimize", "Restore", "Appearance", "Updates", "About" })
                 {
                     ShowPage(page); await Capture(page.ToLowerInvariant() + (compact ? "-compact" : ""));
+                    if (page == "Optimize")
+                    {
+                        PageScroll.ScrollToVerticalOffset(470); await Capture("cleanup" + (compact ? "-compact" : ""));
+                        PageScroll.ScrollToEnd(); await Capture("visual-pack" + (compact ? "-compact" : ""));
+                    }
                 }
             }
             Width = 1280; Height = 900; ShowPage("Appearance");
@@ -338,8 +354,8 @@ public partial class MainWindow : Window
             bool dropdownOpens = PlanPicker.IsDropDownOpen && PlanPicker.Items.Count > 0; PlanPicker.IsDropDownOpen = false;
             _fiveMRunning = true; RefreshMotion(); bool gamingStops = !HeroScene.MotionEnabled && !AppearanceScene.MotionEnabled;
             _fiveMRunning = false;
-            bool success = _scan is not null && themeSaved && invalidColorBlocked && reducedStops && motionTicks && hiddenStops && gamingStops;
-            File.WriteAllText(System.IO.Path.Combine(output, "smoke-result.json"), JsonSerializer.Serialize(new { Success = success, _scan, PowerError = _powerError, SampleCount = _samples.Count, LoadedAccent = loadedAccent, ThemeSaved = themeSaved, InvalidColorBlocked = invalidColorBlocked, ReducedMotionStopsTimers = reducedStops, NativeMotionTicks = motionTicks, HiddenPagesStopTimers = hiddenStops, GamingPausesMotion = gamingStops, PlanDropdownOpens = dropdownOpens, SystemChangesApplied = false, UpdateNetworkRequests = 0 }, new JsonSerializerOptions { WriteIndented = true }));
+            bool success = _scan is not null && graphicsFixtureRestored && !PrefetchCheck.IsChecked.GetValueOrDefault() && themeSaved && invalidColorBlocked && reducedStops && motionTicks && hiddenStops && gamingStops;
+            File.WriteAllText(System.IO.Path.Combine(output, "smoke-result.json"), JsonSerializer.Serialize(new { Success = success, _scan, PowerError = _powerError, SampleCount = _samples.Count, LoadedAccent = loadedAccent, ThemeSaved = themeSaved, InvalidColorBlocked = invalidColorBlocked, ReducedMotionStopsTimers = reducedStops, NativeMotionTicks = motionTicks, HiddenPagesStopTimers = hiddenStops, GamingPausesMotion = gamingStops, PlanDropdownOpens = dropdownOpens, GraphicsFixtureRestored = graphicsFixtureRestored, PrefetchOffByDefault = !PrefetchCheck.IsChecked.GetValueOrDefault(), SystemChangesApplied = false, UpdateNetworkRequests = 0 }, new JsonSerializerOptions { WriteIndented = true }));
             Application.Current.Shutdown(success ? 0 : 1);
         }
         catch (Exception ex) { File.WriteAllText(System.IO.Path.Combine(output, "smoke-error.txt"), ex.ToString()); Application.Current.Shutdown(1); }

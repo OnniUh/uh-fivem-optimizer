@@ -126,6 +126,7 @@ try
         var cancel = new CancellationToken(true); Throws(() => FiveMPaths.InspectCache(Path.Combine(temp, "FiveM", "FiveM.app", "data"), cancel));
     });
     FeatureTests.Run(Test, temp);
+    OptimizationTests.Run(Test, temp);
 }
 finally { Directory.Delete(temp, recursive: true); }
 Console.WriteLine($"\n{passed} passed; {failed} failed. No Windows settings were changed.");
